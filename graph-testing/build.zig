@@ -159,12 +159,6 @@ const std = @import("std");
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
-
-    const mod = b.addModule("graph_testing", .{
-        .root_source_file = b.path("src/root.zig"),
-        .target = target,
-    });
-
     const raylib_dep = b.dependency("raylib_zig", .{
         .target = target,
         .optimize = optimize,
@@ -179,29 +173,13 @@ pub fn build(b: *std.Build) void {
             .root_source_file = b.path("src/main.zig"),
             .target = target,
             .optimize = optimize,
-            // List of modules available for import in source files part of the
-            // root module.
-            .imports = &.{
-                .{ .name = "graph_testing", .module = mod },
-            },
         }),
     });
-
-    // const exe = b.addExecutable(.{
-    //     .name = "zig-raylib-demo",
-    //     .root_source_file = b.path("src/root.zig"),
-    //     .target = target,
-    //     .optimize = optimize,
-    //     .imports = &.{
-    //         .{ .name = "graph_testing", .module = mod },
-    //     },
-    // });
 
     // Add raylib include path (adjust if needed)
     exe.linkLibrary(raylib_artifact);
     exe.root_module.addImport("raylib", raylib);
     exe.root_module.addImport("raygui", raygui);
-    //exe.install();
     b.installArtifact(exe);
     const run_cmd = b.addRunArtifact(exe);
     const run_step = b.step("run", "Run the demo");

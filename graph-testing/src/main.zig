@@ -2,6 +2,8 @@ const rl = @cImport({
     @cInclude("raylib.h");
 });
 const std = @import("std");
+const print = std.debug.print;
+
 
 const ArrayList = std.ArrayList;
 const EntityType = union(enum) { Constructor: ConstructorData };
@@ -31,6 +33,12 @@ const ItemPrototype = struct {
     pub fn createItem(self: ItemPrototype) Item {
         const item = Item{ .name = self.name[0..self.name.len] };
         return item;
+    }
+    pub fn format(
+        self: ItemPrototype,
+        writer: anytype,
+    ) !void {
+        try writer.print("ItemPrototype( name = \"{s}\" )", .{self.name});
     }
 };
 const Item = struct { name: []u8 };
@@ -86,7 +94,7 @@ pub fn main() !void {
     rl.InitWindow(800, 600, "Hello Zig + Raylib");
     const allocator = std.heap.page_allocator;
     var game = Game.init(&allocator) catch |err| {
-        @import("std").debug.print("Failed to init Game: {}\n", .{err});
+       print("Failed to init Game: {}\n", .{err});
         return; // exit main gracefully
     };
     defer game.deinit();
@@ -97,7 +105,11 @@ pub fn main() !void {
 
     try game.addItemPrototype("iron-ore");
     const proto = game.getItemPrototypeByName("iron-ore");
-    std.debug.print("ItemPrototype = {?}\n", .{proto});
+    if (proto) |p| {
+        print("{f}\n", .{p.*});
+    } else {
+        print("ItemPrototype = null\n", .{});
+    }
     while (!rl.WindowShouldClose()) {
         rl.BeginDrawing();
         rl.ClearBackground(rl.RAYWHITE);

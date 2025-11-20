@@ -25,20 +25,9 @@
   ],
   "modules": [
     {
-      "root": "src\\root.zig",
-      "public": true,
-      "imports": []
-    },
-    {
       "root": "src\\main.zig",
       "public": false,
-      "imports": [
-        {
-          "name": "graph_testing",
-          "owner": 0,
-          "module": 0
-        }
-      ]
+      "imports": []
     }
   ],
   "dependencies": [
@@ -1404,15 +1393,15 @@
       "lazy": false
     },
     {
-      "project": 5,
-      "lazy": false
-    },
-    {
-      "project": 3,
-      "lazy": false
-    },
-    {
       "project": 6,
+      "lazy": false
+    },
+    {
+      "project": 4,
+      "lazy": false
+    },
+    {
+      "project": 7,
       "lazy": false
     }
   ]
@@ -3132,8 +3121,30 @@
     {
       "project": 4,
       "lazy": false
+    },
+    {
+      "project": 5,
+      "lazy": false
     }
   ]
+}]]><![CDATA[{
+  "name": null,
+  "version": null,
+  "path": "C:\\Users\\oyvind.nordsveen\\AppData\\Local\\zig\\p\\N-V-__8AABHMqAWYuRdIlflwi8gksPnlUMQBiSxAqQAAZFms",
+  "steps": [
+    {
+      "name": "install",
+      "description": "Copy build artifacts to prefix path",
+      "kind": "uninstall"
+    },
+    {
+      "name": "uninstall",
+      "description": "Remove build artifacts from prefix path",
+      "kind": "uninstall"
+    }
+  ],
+  "modules": [],
+  "dependencies": []
 }]]><![CDATA[{
   "name": null,
   "version": null,

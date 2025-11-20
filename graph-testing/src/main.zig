@@ -2,104 +2,15 @@ const rl = @cImport({
     @cInclude("raylib.h");
 });
 const std = @import("std");
+const Recipe = @import("recipe.zig").Recipe;
+const ItemPrototype = @import("recipe.zig").ItemPrototype;
+const Entity = @import("entity.zig").Entity;
+const EntityKind = @import("entity.zig").EntityKind;
+const CreateConstructor = @import("entity.zig").CreateConstructor;
+
 const print = std.debug.print;
 
 const ArrayList = std.ArrayList;
-const EntityKind = union(enum) { Constructor: ConstructorData };
-
-const ConstructorData = struct { recipe: ?*Recipe, progress : f32 };
-
-const Recipe = struct {
-    name: []u8,
-    cost: f32,
-    output: *ItemPrototype,
-    pub fn init(allocator: std.mem.Allocator, input: []const u8, cost: f32, output: *ItemPrototype) !Recipe {
-        const buf = try allocator.dupe(u8, input);
-        return Recipe{ .name = buf, .cost = cost, .output = output };
-    }
-    pub fn format(
-        self: Recipe,
-        writer: anytype,
-    ) !void {
-        const outputName = self.output.name;
-        try writer.print("Recipe( name = \"{s}\", timeTaken: {}, creates: {s} )", .{ self.name, self.cost, outputName });
-    }
-};
-
-const ItemPrototype = struct {
-    name: []u8,
-    pub fn init(allocator: std.mem.Allocator, input: []const u8) !ItemPrototype {
-        const buf = try allocator.dupe(u8, input);
-        return ItemPrototype{
-            .name = buf,
-        };
-    }
-    pub fn createItem(self: ItemPrototype) Item {
-        const item = Item{ .name = self.name[0..self.name.len] };
-        return item;
-    }
-    pub fn format(
-        self: ItemPrototype,
-        writer: anytype,
-    ) !void {
-        try writer.print("ItemPrototype( name = \"{s}\" )", .{self.name});
-    }
-};
-const Item = struct { name: []u8 };
-const UiData = struct { rectangle: rl.Rectangle };
-
-const Entity = struct {
-    id: usize,
-    kind: EntityKind,
-    uiData: ?UiData,
-    pub fn draw(self: Entity) void {
-        switch (self.kind) {
-            EntityKind.Constructor => {
-                DrawConstructor(self);
-            },
-        }
-    }
-
-    pub fn update(self: *Entity, dt: f32) void {
-        switch (self.kind) {
-            EntityKind.Constructor => {
-                UpdateConstructor(dt,self);
-            },
-        }
-    }
-
-    pub fn init(id: usize, kind: EntityKind) !Entity {
-        return Entity{ .id = id, .kind = kind, .uiData = null };
-    }
-    pub fn format(
-        self: Entity,
-        writer: anytype,
-    ) !void {
-        try writer.print("Entity( id = {}, kind = {} )", .{ self.id, self.kind });
-    }
-};
-
-pub fn DrawConstructor(e: Entity) void {
-    if (e.uiData) |data| {
-        rl.DrawRectangleRounded(data.rectangle, 0.2, 10, rl.BLUE);
-    }
-}
-
-pub fn UpdateConstructor(dt: f32,entity: *Entity) void {
-
-    var entityData = &entity.kind.Constructor;
-    //print("Update Constructor {} {}", .{entityData.progress, dt});
-    entityData.progress += dt;
-    //print("Progress {}\n", .{entityData.progress});
-    if (entityData.recipe) |recipe| {
-        if (entityData.progress >= recipe.cost) {
-            entityData.progress = 0.0;
-            const item = recipe.output.createItem();
-            print("Created {s}\n", .{item.name});
-        }
-    }
-
-}
 
 const Game = struct {
     allocator: std.mem.Allocator,
@@ -115,10 +26,10 @@ const Game = struct {
         self.entities.deinit(self.allocator);
     }
 
-    pub fn update(self: *Game) void {
+    pub fn update(self: *Game) !void {
         const dt = rl.GetFrameTime();
         for (self.entities.items) |*entity| {
-            entity.update(dt);
+            try entity.update(dt);
         }
     }
 
@@ -184,14 +95,13 @@ pub fn main() !void {
     const r = game.getRecipeByName("mine-iron-ore");
     if (r) |res| {
         print("{f}\n", .{res.*});
-        const constData = EntityKind{ .Constructor = ConstructorData{ .recipe = res, .progress = 0.0 } };
-        try game.addEntity(constData);
+        try game.addEntity(try CreateConstructor(allocator, res));
     } else {
         print("Recipe = null\n", .{});
     }
 
     while (!rl.WindowShouldClose()) {
-        game.update();
+        try game.update();
         rl.BeginDrawing();
         rl.ClearBackground(rl.RAYWHITE);
         rl.DrawText("Hello from Zig on Windows!", 190, 200, 20, rl.LIGHTGRAY);

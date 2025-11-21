@@ -1,17 +1,14 @@
-const rl = @cImport({
-    @cInclude("raylib.h");
-});
 const std = @import("std");
-const Recipe = @import("recipe.zig").Recipe;
-const ItemPrototype = @import("recipe.zig").ItemPrototype;
+const print = std.debug.print;
+const ArrayList = std.ArrayList;
+
+const CreateConstructor = @import("entity.zig").CreateConstructor;
 const Entity = @import("entity.zig").Entity;
 const EntityKind = @import("entity.zig").EntityKind;
+const ItemPrototype = @import("recipe.zig").ItemPrototype;
+const Recipe = @import("recipe.zig").Recipe;
+const rl = @import("raylib.zig").rl;
 const UiData = @import("entity.zig").UiData;
-const CreateConstructor = @import("entity.zig").CreateConstructor;
-
-const print = std.debug.print;
-
-const ArrayList = std.ArrayList;
 
 const World = struct {
     allocator: std.mem.Allocator,
@@ -95,7 +92,6 @@ pub fn main() !void {
     try world.addRecipe("mine-iron-ore", 1, "iron-ore");
     const r = world.getRecipeByName("mine-iron-ore");
     if (r) |res| {
-        //print("{f}\n", .{res.*});
         try world.addEntity(try CreateConstructor(allocator, res), .{ .rectangle = .{ .x = 100, .y = 100, .width = 200, .height = 100 } });
     } else {
         print("Recipe = null\n", .{});

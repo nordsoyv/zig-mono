@@ -2,7 +2,7 @@ const std = @import("std");
 
 const rl = @import("raylib");
 
-pub fn DrawBox(rect: rl.Rectangle, heading: [:0]const u8) void {
+pub fn drawBox(rect: rl.Rectangle, heading: [:0]const u8) void {
     const xStartPos: c_int = @intFromFloat(rect.x);
     const yStartPos: c_int = @intFromFloat(rect.y);
     rl.drawRectangleRounded(rect, 0.2, 10, rl.Color.white);
@@ -18,7 +18,7 @@ pub fn DrawBox(rect: rl.Rectangle, heading: [:0]const u8) void {
     rl.drawText(heading, xStartPos + 20, yStartPos + 5, 10, rl.Color.white);
 }
 
-pub fn DrawProgressBar(xPos: c_int, yPos: c_int, width: f32, progress: f32) void {
+pub fn drawProgressBar(xPos: c_int, yPos: c_int, width: f32, progress: f32) void {
     rl.drawRectangle(xPos, yPos, @intFromFloat(width), 5, rl.Color.purple);
     rl.drawRectangle(xPos + 1, yPos + 1, @intFromFloat((width * progress) - 1), 5 - 2, rl.Color.black);
 }

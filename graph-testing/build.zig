@@ -180,6 +180,7 @@ pub fn build(b: *std.Build) void {
     exe.linkLibrary(raylib_artifact);
     exe.root_module.addImport("raylib", raylib);
     exe.root_module.addImport("raygui", raygui);
+
     b.installArtifact(exe);
     const run_cmd = b.addRunArtifact(exe);
     const run_step = b.step("run", "Run the demo");

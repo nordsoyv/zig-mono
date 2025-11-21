@@ -1,24 +1,24 @@
 const std = @import("std");
 
-const rl = @import("raylib.zig").rl;
+const rl = @import("raylib");
 
-pub fn DrawBox(rect: rl.Rectangle, heading: [*:0]const u8) void {
+pub fn DrawBox(rect: rl.Rectangle, heading: [:0]const u8) void {
     const xStartPos: c_int = @intFromFloat(rect.x);
     const yStartPos: c_int = @intFromFloat(rect.y);
-    rl.DrawRectangleRounded(rect, 0.2, 10, rl.WHITE);
-    const pos = rl.GetMousePosition();
-    if (rl.CheckCollisionPointRec(pos, rect)) {
-        rl.DrawRectangleRoundedLines(rect, 0.2, 10, rl.BLACK);
+    rl.drawRectangleRounded(rect, 0.2, 10, rl.Color.white);
+    const pos = rl.getMousePosition();
+    if (rl.checkCollisionPointRec(pos, rect)) {
+        rl.drawRectangleRoundedLines(rect, 0.2, 10, rl.Color.black);
     } else {
-        rl.DrawRectangleRoundedLines(rect, 0.2, 10, rl.PURPLE);
+        rl.drawRectangleRoundedLines(rect, 0.2, 10, rl.Color.purple);
     }
     // std.log.debug("{} {}", .{ pos.x, pos.y });
     // rl.DrawRectangleRounded(rect, 0.2, 10, rl.WHITE);
-    rl.DrawRectangleRounded(.{ .width = rect.width, .x = rect.x, .y = rect.y, .height = 20 }, 1, 10, rl.SKYBLUE);
-    rl.DrawText(heading, xStartPos + 20, yStartPos + 5, 10, rl.WHITE);
+    rl.drawRectangleRounded(.{ .width = rect.width, .x = rect.x, .y = rect.y, .height = 20 }, 1, 10, rl.Color.sky_blue);
+    rl.drawText(heading, xStartPos + 20, yStartPos + 5, 10, rl.Color.white);
 }
 
 pub fn DrawProgressBar(xPos: c_int, yPos: c_int, width: f32, progress: f32) void {
-    rl.DrawRectangle(xPos, yPos, @intFromFloat(width), 5, rl.PURPLE);
-    rl.DrawRectangle(xPos + 1, yPos + 1, @intFromFloat((width * progress) - 1), 5 - 2, rl.BLACK);
+    rl.drawRectangle(xPos, yPos, @intFromFloat(width), 5, rl.Color.purple);
+    rl.drawRectangle(xPos + 1, yPos + 1, @intFromFloat((width * progress) - 1), 5 - 2, rl.Color.black);
 }

@@ -75,6 +75,15 @@ fn DrawConstructor(e: Entity) !void {
 }
 
 fn UpdateConstructor(dt: f32, entity: *Entity) !void {
+    if (entity.uiData) |*data| {
+        const pos = rl.GetMousePosition();
+        if (rl.CheckCollisionPointRec(pos, data.rectangle) and rl.IsMouseButtonDown(0)) {
+            const delta = rl.GetMouseDelta();
+            data.rectangle.x += delta.x;
+            data.rectangle.y += delta.y;
+        }
+    }
+
     var entityData = &entity.kind.Constructor;
     if (entityData.output.items.len < 5) {
         if (entityData.recipe) |recipe| {

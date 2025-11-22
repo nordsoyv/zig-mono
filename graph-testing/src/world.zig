@@ -7,6 +7,15 @@ const Entity = @import("entity.zig").Entity;
 const EntityKind = @import("entity.zig").EntityKind;
 const UiData = @import("entity.zig").UiData;
 
+pub var world: ?World = null;
+
+pub fn getWorld(allocator: std.mem.Allocator) !*World {
+    if (world == null) {
+        world = try World.init(allocator);
+    }
+    return &world.?;
+}
+
 pub const World = struct {
     allocator: std.mem.Allocator,
     recipes: ArrayList(Recipe),
@@ -23,6 +32,10 @@ pub const World = struct {
 
     pub fn update(self: *World) !void {
         const dt = rl.getFrameTime();
+        // var it = self.entities.iterator();
+        // while (it.next()) |*entity| {
+        //     try entity.update(dt);
+        // }
         for (self.entities.items) |*entity| {
             try entity.update(dt);
         }

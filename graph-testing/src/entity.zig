@@ -2,11 +2,12 @@ const std = @import("std");
 const print = std.debug.print;
 const ArrayList = std.ArrayList;
 
-const drawBox = @import("draw.zig").DrawBox;
-const drawProgressBar = @import("draw.zig").DrawProgressBar;
+const drawBox = @import("draw.zig").drawBox;
+const drawProgressBar = @import("draw.zig").drawProgressBar;
 const Item = @import("recipe.zig").Item;
 const Recipe = @import("recipe.zig").Recipe;
 const rl = @import("raylib");
+const getWorld = @import("world.zig").getWorld;
 
 pub const EntityKind = union(enum) { Constructor: ConstructorData };
 
@@ -16,7 +17,22 @@ const ConstructorData = struct {
     progress: f32,
     output: ArrayList(Item),
 };
+
+const OutputData = struct {
+    allocator: std.mem.Allocator,
+    buffer: ArrayList(Item),
+    pub fn hasRoom(self: OutputData) bool {
+        if (self.buffer.items.len < 5) return true;
+        return false;
+    }
+
+    pub fn addItem(self: *OutputData, item: Item) void {
+        self.buffer.append(self.allocator, item);
+    }
+};
+
 pub const UiData = struct { rectangle: rl.Rectangle };
+
 pub const Entity = struct {
     id: usize,
     kind: EntityKind,
@@ -27,6 +43,9 @@ pub const Entity = struct {
             EntityKind.Constructor => {
                 try drawConstructor(self);
             },
+            // EntityKind.Output => {
+            //     try drawOutput(self);
+            // },
         }
     }
 
@@ -35,6 +54,9 @@ pub const Entity = struct {
             EntityKind.Constructor => {
                 try updateConstructor(dt, self);
             },
+            // EntityKind.Output => {
+            //     try updateOutput(dt, self);
+            // },
         }
     }
 
@@ -71,7 +93,7 @@ fn drawConstructor(e: Entity) !void {
             const result = try std.fmt.bufPrintZ(&buffer, "Output: {} {s}", .{ entityData.output.items.len, entityData.output.getLast().name });
             rl.drawText(@ptrCast(result), xStartPos + 20, yStartPos + 60, 10, rl.Color.black);
         }
-        rl.drawCircle(@intFromFloat(data.rectangle.x + data.rectangle.width), @intFromFloat(data.rectangle.y + data.rectangle.height / 2), 5, rl.Color.white);
+        // rl.drawCircle(@intFromFloat(data.rectangle.x + data.rectangle.width), @intFromFloat(data.rectangle.y + data.rectangle.height / 2), 5, rl.Color.white);
     }
 }
 
@@ -86,6 +108,8 @@ fn updateConstructor(dt: f32, entity: *Entity) !void {
     }
 
     var entityData = &entity.kind.Constructor;
+    // var world = getWorld();
+    // var outputEntity = world.getEntity(entityData.outputId);
     if (entityData.output.items.len < 5) {
         if (entityData.recipe) |recipe| {
             entityData.progress += dt;
@@ -98,4 +122,20 @@ fn updateConstructor(dt: f32, entity: *Entity) !void {
     } else {
         // print("Output full\n", .{});
     }
+}
+
+pub fn createOutput(allocator: std.mem.Allocator) !EntityKind {
+    const constData = EntityKind{ .Output = OutputData{ .allocator = allocator, .output = try ArrayList(Item).initCapacity(allocator, 5) } };
+    return constData;
+}
+
+fn drawOutput(e: Entity) !void {
+    if (e.uiData) |uiData| {
+        rl.drawCircle(@intFromFloat(uiData.rectangle.x), @intFromFloat(uiData.rectangle.y), 5, rl.Color.white);
+    }
+}
+
+fn updateOutput(dt: f32, entity: *Entity) !void {
+    _ = dt;
+    _ = entity;
 }

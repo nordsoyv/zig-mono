@@ -3,17 +3,14 @@ const std = @import("std");
 const print = std.debug.print;
 const ArrayList = std.ArrayList;
 
-const CreateConstructor = @import("entity.zig").CreateConstructor;
+const createConstructor = @import("entity.zig").createConstructor;
 
-const World = @import("world.zig").World;
+const World = @import("world.zig");
 
 pub fn main() !void {
     rl.initWindow(800, 600, "Hello Zig + Raylib");
     const allocator = std.heap.page_allocator;
-    var world = World.init(allocator) catch |err| {
-        print("Failed to init World: {}\n", .{err});
-        return; // exit main gracefully
-    };
+    var world = try World.getWorld(allocator);
     defer world.deinit();
     try world.addItemPrototype("iron-ore");
     const proto = world.getItemPrototypeByName("iron-ore");
@@ -26,7 +23,7 @@ pub fn main() !void {
     try world.addRecipe("mine-iron-ore", 1, "iron-ore");
     const r = world.getRecipeByName("mine-iron-ore");
     if (r) |res| {
-        try world.addEntity(try CreateConstructor(allocator, res), .{ .rectangle = .{ .x = 100, .y = 100, .width = 200, .height = 100 } });
+        _= try world.addEntity(try createConstructor(allocator, res), .{ .rectangle = .{ .x = 100, .y = 100, .width = 200, .height = 100 } });
     } else {
         print("Recipe = null\n", .{});
     }

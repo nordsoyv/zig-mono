@@ -3,16 +3,20 @@ const std = @import("std");
 const ArrayList = std.ArrayList;
 const Recipe = @import("recipe.zig").Recipe;
 const ItemPrototype = @import("recipe.zig").ItemPrototype;
-const Entity = @import("entity.zig").Entity;
-const EntityKind = @import("entity.zig").EntityKind;
-const UiData = @import("entity.zig").UiData;
+const Entity = @import("entities/entity.zig").Entity;
+const EntityKind = @import("entities/entity.zig").EntityKind;
+const UiData = @import("entities/entity.zig").UiData;
 
 pub var world: ?World = null;
 
-pub fn getWorld(allocator: std.mem.Allocator) !*World {
+pub fn initWorld(allocator: std.mem.Allocator) !*World {
     if (world == null) {
         world = try World.init(allocator);
     }
+    return &world.?;
+}
+
+pub fn getWorld() *World {
     return &world.?;
 }
 
@@ -58,9 +62,9 @@ pub const World = struct {
         try self.entities.put(nextId, entity);
     }
 
-    pub fn getEntity(self: *World, id: usize) *Entity {
+    pub fn getEntity(self: *World, id: usize) ?*Entity {
         if (self.entities.contains(id)) {
-            return self.entities.get(id).*;
+            return self.entities.getPtr(id);
         } else {
             return null;
         }

@@ -33,9 +33,6 @@ pub fn main() !void {
         rl.beginDrawing();
         rl.clearBackground(rl.Color.dark_gray);
         try world.draw();
-        //rl.DrawText("Hello from Zig on Windows!", 190, 200, 20, rl.LIGHTGRAY);
-
-        // miner.draw();
         rl.endDrawing();
     }
     rl.closeWindow();

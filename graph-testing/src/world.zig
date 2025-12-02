@@ -2,6 +2,7 @@ const rl = @import("raylib");
 const std = @import("std");
 const ArrayList = std.ArrayList;
 const Recipe = @import("recipe.zig").Recipe;
+const RecipeIngredient = @import("recipe.zig").RecipeIngredient;
 const ItemPrototype = @import("recipe.zig").ItemPrototype;
 const Entity = @import("entities/entity.zig").Entity;
 const EntityKind = @import("entities/entity.zig").EntityKind;
@@ -73,7 +74,7 @@ pub const World = struct {
     pub fn addRecipe(self: *World, name: []const u8, cost: f32, outputName: []const u8) !void {
         const item = self.getItemPrototypeByName(outputName);
         if (item) |i| {
-            const recipe = try Recipe.init(self.allocator, name, cost, i);
+            const recipe = try Recipe.init(self.allocator, name, cost, i, try std.ArrayList(RecipeIngredient).initCapacity(self.allocator,0));
             try self.recipes.put(name, recipe);
         } else {
             return error.ItemNotFound;

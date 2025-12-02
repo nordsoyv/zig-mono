@@ -1,13 +1,28 @@
 const std = @import("std");
 
+pub const RecipeIngredient = struct{
+    amount: u32,
+    item:  []u8,
+};
+
 pub const Recipe = struct {
     name: []u8,
     cost: f32,
     output: *ItemPrototype,
-    pub fn init(allocator: std.mem.Allocator, input: []const u8, cost: f32, output: *ItemPrototype) !Recipe {
+    outputAmount: u32,
+    ingredients: std.ArrayList(RecipeIngredient),
+    pub fn init(allocator: std.mem.Allocator, input: []const u8, cost: f32, output: *ItemPrototype, ingredients: std.ArrayList(RecipeIngredient)) !Recipe {
         const buf = try allocator.dupe(u8, input);
-        return Recipe{ .name = buf, .cost = cost, .output = output };
+        return Recipe{ .name = buf, .cost = cost, .output = output , .ingredients = ingredients, .outputAmount = 1};
     }
+    pub fn create(self: *Recipe) []Item {
+        const items = try std.ArrayList(Item).initCapacity(self.allocator, self.outputAmount);
+        for (0..self.outputAmount) |i| {
+            items.append(self.output.createItem());
+        }
+        return items.toOwnedSlice();
+    }
+
     pub fn format(
         self: Recipe,
         writer: anytype,

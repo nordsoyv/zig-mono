@@ -31,15 +31,28 @@ pub const Parser = struct {
     }
 
     fn parseEntity(self: *Parser) !ast.AstEntity {
+        const header = try self.parseEntityHeader();
+        const body = try self.parseBracedBody();
+        return ast.AstEntity.init(header.main_type, header.sub_type, header.name, header.ref, body);
+    }
+
+    const EntityHeader = struct {
+        main_type: []const u8,
+        sub_type: ?[]const u8,
+        name: ?[]const u8,
+        ref: ?ast.AstReference,
+    };
+
+    fn parseEntityHeader(self: *Parser) !EntityHeader {
         const main_type_tok = self.peek();
         if (main_type_tok.kind != .identifier) return error.ExpectedEntityType;
         _ = self.advance();
 
         const main_type = try self.allocator.dupe(u8, main_type_tok.lexeme);
-
         var sub_type: ?[]const u8 = null;
         var name: ?[]const u8 = null;
         var ref: ?ast.AstReference = null;
+
         while (true) {
             const t = self.peek();
             if (t.kind == .eof) return error.UnexpectedEof;
@@ -52,11 +65,7 @@ pub const Parser = struct {
             }
 
             if (t.kind == .hash and name == null) {
-                _ = self.advance();
-                const id = self.peek();
-                if (id.kind != .identifier) return error.UnexpectedToken;
-                name = try self.allocator.dupe(u8, id.lexeme);
-                _ = self.advance();
+                name = try self.parseName();
                 continue;
             }
 
@@ -68,6 +77,16 @@ pub const Parser = struct {
             _ = self.advance();
         }
 
+        return .{ .main_type = main_type, .sub_type = sub_type, .name = name, .ref = ref };
+    }
+
+    fn parseName(self: *Parser) ![]const u8 {
+        _ = try self.expect(.hash);
+        const id = try self.expect(.identifier);
+        return self.allocator.dupe(u8, id.lexeme);
+    }
+
+    fn parseBracedBody(self: *Parser) ![]const lexer.Token {
         _ = try self.expect(.l_brace);
 
         const body_start = self.i;
@@ -83,9 +102,8 @@ pub const Parser = struct {
             }
         }
 
-        // body is everything between the outer braces, excluding the closing '}' we just consumed
         const body_end = self.i - 1;
-        return ast.AstEntity.init(main_type, sub_type, name, ref, self.tokens[body_start..body_end]);
+        return self.tokens[body_start..body_end];
     }
 
     fn parseReference(self: *Parser) !ast.AstReference {

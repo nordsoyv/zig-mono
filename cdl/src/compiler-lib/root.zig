@@ -3,6 +3,8 @@ const std = @import("std");
 
 pub const lexer = @import("lexer.zig");
 pub const compiler = @import("compiler.zig");
+pub const ast = @import("ast.zig");
+pub const parser = @import("parser.zig");
 
 test "lex cdl_test" {
     var c = compiler.Compiler.init(std.testing.allocator);
@@ -37,6 +39,51 @@ test "dump tokens" {
     try c.dumpTokens(out.writer(std.testing.allocator), "config x { a: 1 }");
     // std.debug.print("{s}", .{out.items});
     try std.testing.expect(out.items.len > 0);
+}
+
+test "parse script scaffold" {
+    var c = compiler.Compiler.init(std.testing.allocator);
+    defer c.deinit();
+
+    const toks = try c.tokenize(cdl_test);
+    var p = parser.Parser.init(c.allocator(), toks);
+    const script = try p.parseScript();
+    try std.testing.expect(script.tokens.len == toks.len);
+    try std.testing.expect(script.entities.len > 0);
+    try std.testing.expect(std.mem.eql(u8, script.entities[0].main_type, "config"));
+    try std.testing.expect(script.entities[0].sub_type != null);
+    try std.testing.expect(std.mem.eql(u8, script.entities[0].sub_type.?, "access"));
+    try std.testing.expect(script.entities[0].name == null);
+
+    var found_named: bool = false;
+    for (script.entities) |ent| {
+        if (!std.mem.eql(u8, ent.main_type, "custom")) continue;
+        if (ent.sub_type == null or !std.mem.eql(u8, ent.sub_type.?, "properties")) continue;
+        if (ent.name == null or !std.mem.eql(u8, ent.name.?, "pptExport")) continue;
+        found_named = true;
+        break;
+    }
+    try std.testing.expect(found_named);
+}
+
+test "parse entity header reference" {
+    var c = compiler.Compiler.init(std.testing.allocator);
+    defer c.deinit();
+
+    const input = "config access #x @ref.to.another.entity { a: 1 }";
+    const toks = try c.tokenize(input);
+    var p = parser.Parser.init(c.allocator(), toks);
+    const script = try p.parseScript();
+
+    try std.testing.expect(script.entities.len == 1);
+    const ent = script.entities[0];
+    try std.testing.expect(std.mem.eql(u8, ent.main_type, "config"));
+    try std.testing.expect(ent.sub_type != null);
+    try std.testing.expect(std.mem.eql(u8, ent.sub_type.?, "access"));
+    try std.testing.expect(ent.name != null);
+    try std.testing.expect(std.mem.eql(u8, ent.name.?, "x"));
+    try std.testing.expect(ent.ref != null);
+    try std.testing.expect(std.mem.eql(u8, ent.ref.?.path, "ref.to.another.entity"));
 }
 
 const cdl_test =

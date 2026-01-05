@@ -61,6 +61,20 @@ pub const Lexer = struct {
         return .{ .input = input };
     }
 
+    pub fn tokenize(self: *Lexer, allocator: std.mem.Allocator) ![]Token {
+        var tokens: std.ArrayList(Token) = .empty;
+        errdefer tokens.deinit(allocator);
+
+        while (true) {
+            const t = self.next();
+            if (t.kind == .invalid) return error.InvalidToken;
+            try tokens.append(allocator, t);
+            if (t.kind == .eof) break;
+        }
+
+        return try tokens.toOwnedSlice(allocator);
+    }
+
     pub fn next(self: *Lexer) Token {
         self.skipTrivia();
 

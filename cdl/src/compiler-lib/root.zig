@@ -2,28 +2,27 @@
 const std = @import("std");
 
 pub const lexer = @import("lexer.zig");
+pub const compiler = @import("compiler.zig");
 
 test "lex cdl_test" {
-    var l = lexer.Lexer.init(cdl_test);
-    while (true) {
-        const t = l.next();
-        try std.testing.expect(t.kind != .invalid);
-        if (t.kind == .eof) break;
-    }
+    var c = compiler.Compiler.init(std.testing.allocator);
+    defer c.deinit();
+
+    const toks = try c.tokenize(cdl_test);
+    try std.testing.expect(toks.len > 0);
+    try std.testing.expect(toks[toks.len - 1].kind == .eof);
 }
 
 test "lex multiline string" {
-    var l = lexer.Lexer.init(cdl_multiline_string_test);
+    var c = compiler.Compiler.init(std.testing.allocator);
+    defer c.deinit();
+
+    const toks = try c.tokenize(cdl_multiline_string_test);
     var saw_multiline_string = false;
-    while (true) {
-        const t = l.next();
-        try std.testing.expect(t.kind != .invalid);
-        if (t.kind == .string) {
-            if (std.mem.indexOfScalar(u8, t.lexeme, '\n') != null) {
-                saw_multiline_string = true;
-            }
+    for (toks) |t| {
+        if (t.kind == .string and std.mem.indexOfScalar(u8, t.lexeme, '\n') != null) {
+            saw_multiline_string = true;
         }
-        if (t.kind == .eof) break;
     }
     try std.testing.expect(saw_multiline_string);
 }

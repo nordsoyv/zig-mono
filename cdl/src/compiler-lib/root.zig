@@ -48,12 +48,30 @@ test "parse script scaffold" {
     const toks = try c.tokenize(cdl_test);
     var p = parser.Parser.init(c.allocator(), toks);
     const script = try p.parseScript();
+    try std.testing.expect(script.parent == null);
     try std.testing.expect(script.tokens.len == toks.len);
     try std.testing.expect(script.entities.len > 0);
-    try std.testing.expect(std.mem.eql(u8, script.entities[0].main_type, "config"));
-    try std.testing.expect(script.entities[0].sub_type != null);
-    try std.testing.expect(std.mem.eql(u8, script.entities[0].sub_type.?, "access"));
-    try std.testing.expect(script.entities[0].name == null);
+    const ent0 = script.entities[0];
+    switch (ent0.parent) {
+        .script => |ps| try std.testing.expect(ps == script),
+        else => try std.testing.expect(false),
+    }
+
+    try std.testing.expect(std.mem.eql(u8, ent0.main_type, "config"));
+    try std.testing.expect(ent0.sub_type != null);
+    try std.testing.expect(std.mem.eql(u8, ent0.sub_type.?, "access"));
+    try std.testing.expect(ent0.name == null);
+
+    var found_portalid: bool = false;
+    for (ent0.properties) |prop| {
+        try std.testing.expect(prop.parent == ent0);
+        if (!std.mem.eql(u8, prop.name, "portalid")) continue;
+        try std.testing.expect(prop.value_tokens.len > 0);
+        try std.testing.expect(std.mem.eql(u8, prop.value_tokens[0].lexeme, "2995"));
+        found_portalid = true;
+        break;
+    }
+    try std.testing.expect(found_portalid);
 
     var found_named: bool = false;
     for (script.entities) |ent| {
@@ -64,6 +82,24 @@ test "parse script scaffold" {
         break;
     }
     try std.testing.expect(found_named);
+
+    var found_nested: bool = false;
+    for (script.entities) |ent| {
+        if (!std.mem.eql(u8, ent.main_type, "reportBase")) continue;
+        for (ent.children) |child| {
+            switch (child.parent) {
+                .entity => |pe| try std.testing.expect(pe == ent),
+                else => try std.testing.expect(false),
+            }
+            if (!std.mem.eql(u8, child.main_type, "rule")) continue;
+            if (child.sub_type == null or !std.mem.eql(u8, child.sub_type.?, "nodesHM")) continue;
+            if (child.name == null or !std.mem.eql(u8, child.name.?, "userNodeAssignment")) continue;
+            found_nested = true;
+            break;
+        }
+        break;
+    }
+    try std.testing.expect(found_nested);
 }
 
 test "parse entity header reference" {
@@ -77,6 +113,11 @@ test "parse entity header reference" {
 
     try std.testing.expect(script.entities.len == 1);
     const ent = script.entities[0];
+    switch (ent.parent) {
+        .script => |ps| try std.testing.expect(ps == script),
+        else => try std.testing.expect(false),
+    }
+
     try std.testing.expect(std.mem.eql(u8, ent.main_type, "config"));
     try std.testing.expect(ent.sub_type != null);
     try std.testing.expect(std.mem.eql(u8, ent.sub_type.?, "access"));
@@ -84,6 +125,12 @@ test "parse entity header reference" {
     try std.testing.expect(std.mem.eql(u8, ent.name.?, "x"));
     try std.testing.expect(ent.ref != null);
     try std.testing.expect(std.mem.eql(u8, ent.ref.?.path, "ref.to.another.entity"));
+
+    try std.testing.expect(ent.properties.len == 1);
+    try std.testing.expect(ent.properties[0].parent == ent);
+    try std.testing.expect(std.mem.eql(u8, ent.properties[0].name, "a"));
+    try std.testing.expect(ent.properties[0].value_tokens.len == 1);
+    try std.testing.expect(std.mem.eql(u8, ent.properties[0].value_tokens[0].lexeme, "1"));
 }
 
 const cdl_test =

@@ -5,7 +5,6 @@ pub const Kind = enum {
     invalid,
 
     identifier,
-    keyword,
     number,
     string,
 
@@ -178,8 +177,7 @@ pub const Lexer = struct {
         }
 
         const lex = self.input[start_i..self.i];
-        const kind: Kind = if (isKeyword(lex)) .keyword else .identifier;
-        return .{ .kind = kind, .lexeme = lex, .start = start_i, .end = self.i, .line = start_line, .column = start_col };
+        return .{ .kind = .identifier, .lexeme = lex, .start = start_i, .end = self.i, .line = start_line, .column = start_col };
     }
 
     fn number(self: *Lexer, start_i: usize, start_line: u32, start_col: u32) Token {
@@ -291,87 +289,4 @@ fn isIdentStart(c: u8) bool {
 
 fn isIdentContinue(c: u8) bool {
     return isIdentStart(c) or isDigit(c);
-}
-
-fn isKeyword(s: []const u8) bool {
-    const keywords = [_][]const u8{
-        "config",
-        "custom",
-        "properties",
-        "reportBase",
-        "rule",
-        "enabled",
-        "hub",
-        "viaStrategy",
-        "referenceData",
-        "selectors",
-        "array",
-        "size",
-        "table",
-        "measure",
-        "variable",
-        "vtable",
-        "filter",
-        "expression",
-        "value",
-        "label",
-        "option",
-        "mapping",
-        "intervals",
-        "method",
-        "toRecord",
-        "byKey",
-        "key",
-        "from",
-        "to",
-        "item",
-        "isDefault",
-        "groupBy",
-        "values",
-        "isKey",
-        "parent",
-        "type",
-        "oneToOne",
-        "oneToMany",
-        "primaryKey",
-        "foreignKey",
-        "propagateFilter",
-        "recoding",
-        "ranges",
-        "leftopen",
-        "none",
-        "take",
-        "total",
-        "row",
-        "column",
-        "cell",
-        "formula",
-        "formatter",
-        "formatString",
-        "map",
-        "ifEmpty",
-        "hide",
-        "removeEmptyRows",
-        "ignoreFilters",
-        "question",
-        "categorySet",
-        "dataset",
-        "dataSet",
-        "dataTable",
-        "dataGrid",
-        "reportingHierarchy",
-        "relation",
-        "propagateFilter",
-        "defaultTable",
-        "publicName",
-        "mode",
-        "nodeSorting",
-        "showBreadcrumb",
-    };
-
-    for (keywords) |kw| {
-        if (std.mem.eql(u8, s, kw)) return true;
-    }
-
-    return false;
 }

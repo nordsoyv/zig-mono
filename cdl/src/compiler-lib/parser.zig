@@ -11,36 +11,36 @@ pub const Parser = struct {
         return .{ .allocator = allocator, .tokens = tokens };
     }
 
-    pub fn parseScript(self: *Parser) anyerror!*ast.AstScript {
+    pub fn parseScript(self: *Parser) anyerror!ast.Ast {
         if (self.tokens.len == 0) return error.UnexpectedEof;
         if (self.tokens[self.tokens.len - 1].kind != .eof) return error.ExpectedEof;
 
-        const script = try self.allocator.create(ast.AstScript);
-        script.* = ast.AstScript.init(self.tokens, &[_]*ast.AstEntity{});
+        var store = ast.NodeStore.init(self.allocator);
 
-        var entities: std.ArrayList(*ast.AstEntity) = .empty;
+        const root = try store.add(.{ .script = ast.AstScript.init(self.tokens, &[_]ast.NodeId{}) });
+
+        var entities: std.ArrayList(ast.NodeId) = .empty;
         errdefer entities.deinit(self.allocator);
 
         while (true) {
             self.skipSeparators();
             if (self.peek().kind == .eof) break;
-            const ent = try self.parseEntity(.{ .script = script });
+            const ent = try self.parseEntity(&store, root);
             try entities.append(self.allocator, ent);
         }
 
-        script.* = ast.AstScript.init(self.tokens, try entities.toOwnedSlice(self.allocator));
-        return script;
+        store.script(root).entities = try entities.toOwnedSlice(self.allocator);
+        return .{ .store = store, .root = root };
     }
 
-    fn parseEntity(self: *Parser, parent: ast.AstEntity.Parent) anyerror!*ast.AstEntity {
+    fn parseEntity(self: *Parser, store: *ast.NodeStore, parent: ast.NodeId) anyerror!ast.NodeId {
         const header = try self.parseEntityHeader();
-        const node = try self.allocator.create(ast.AstEntity);
-        node.* = ast.AstEntity.init(parent, header.main_type, header.sub_type, header.name, header.ref, &[_]*ast.AstProperty{}, &[_]*ast.AstEntity{});
-
-        const body = try self.parseBracedBodyItems(node);
-        node.properties = body.properties;
-        node.children = body.children;
-        return node;
+        const id = try store.add(.{ .entity = ast.AstEntity.init(parent, header.main_type, header.sub_type, header.name, header.ref, &[_]ast.NodeId{}, &[_]ast.NodeId{}) });
+        const body = try self.parseBracedBodyItems(store, id);
+        const ent = store.entity(id);
+        ent.properties = body.properties;
+        ent.children = body.children;
+        return id;
     }
 
     const EntityHeader = struct {
@@ -94,18 +94,18 @@ pub const Parser = struct {
     }
 
     const ParsedBody = struct {
-        properties: []const *ast.AstProperty,
-        children: []const *ast.AstEntity,
+        properties: []const ast.NodeId,
+        children: []const ast.NodeId,
     };
 
-    fn parseBracedBodyItems(self: *Parser, parent: *ast.AstEntity) anyerror!ParsedBody {
+    fn parseBracedBodyItems(self: *Parser, store: *ast.NodeStore, parent: ast.NodeId) anyerror!ParsedBody {
         _ = try self.expect(.l_brace);
         var depth: usize = 1;
 
-        var properties: std.ArrayList(*ast.AstProperty) = .empty;
+        var properties: std.ArrayList(ast.NodeId) = .empty;
         errdefer properties.deinit(self.allocator);
 
-        var children: std.ArrayList(*ast.AstEntity) = .empty;
+        var children: std.ArrayList(ast.NodeId) = .empty;
         errdefer children.deinit(self.allocator);
 
         while (depth > 0) {
@@ -114,13 +114,13 @@ pub const Parser = struct {
 
             if (depth == 1) {
                 if (self.isEntityStartInBody()) {
-                    const child = try self.parseEntity(.{ .entity = parent });
+                    const child = try self.parseEntity(store, parent);
                     try children.append(self.allocator, child);
                     continue;
                 }
 
                 if (self.isPropertyStartInBody()) {
-                    const prop = try self.parsePropertyLine(parent);
+                    const prop = try self.parsePropertyLine(store, parent);
                     try properties.append(self.allocator, prop);
                     continue;
                 }
@@ -162,7 +162,7 @@ pub const Parser = struct {
         return self.tokens[self.i + 1].kind == .colon;
     }
 
-    fn parsePropertyLine(self: *Parser, parent: *ast.AstEntity) anyerror!*ast.AstProperty {
+    fn parsePropertyLine(self: *Parser, store: *ast.NodeStore, parent: ast.NodeId) anyerror!ast.NodeId {
         const name_tok = try self.expect(.identifier);
         const name = try self.allocator.dupe(u8, name_tok.lexeme);
         const colon_tok = try self.expect(.colon);
@@ -193,9 +193,7 @@ pub const Parser = struct {
             }
         }
         const value_end = self.i;
-        const prop = try self.allocator.create(ast.AstProperty);
-        prop.* = ast.AstProperty.init(parent, name, self.tokens[value_start..value_end]);
-        return prop;
+        return store.add(.{ .property = ast.AstProperty.init(parent, name, self.tokens[value_start..value_end]) });
     }
 
     fn parseReference(self: *Parser) !ast.AstReference {

@@ -51,6 +51,36 @@ pub const Token = struct {
     column: u32,
 };
 
+pub fn dumpTokens(writer: anytype, tokens: []const Token) !void {
+    for (tokens) |t| {
+        try writer.print("{d}:{d} {s} \"", .{ t.line, t.column, @tagName(t.kind) });
+        try writeEscaped(writer, t.lexeme);
+        try writer.print("\"\n", .{});
+    }
+}
+
+fn writeEscaped(writer: anytype, s: []const u8) !void {
+    const max_len: usize = 160;
+    const n = @min(s.len, max_len);
+
+    var i: usize = 0;
+    while (i < n) : (i += 1) {
+        const c = s[i];
+        switch (c) {
+            '\\' => try writer.writeAll("\\\\"),
+            '"' => try writer.writeAll("\\\""),
+            '\n' => try writer.writeAll("\\n"),
+            '\r' => try writer.writeAll("\\r"),
+            '\t' => try writer.writeAll("\\t"),
+            else => try writer.writeByte(c),
+        }
+    }
+
+    if (s.len > max_len) {
+        try writer.writeAll("...");
+    }
+}
+
 pub const Lexer = struct {
     input: []const u8,
     i: usize = 0,

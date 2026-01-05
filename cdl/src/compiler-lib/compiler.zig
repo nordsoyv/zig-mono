@@ -20,4 +20,9 @@ pub const Compiler = struct {
         var l = lexer.Lexer.init(input);
         return l.tokenize(self.allocator());
     }
+
+    pub fn dumpTokens(self: *Compiler, writer: anytype, input: []const u8) !void {
+        const toks = try self.tokenize(input);
+        try lexer.dumpTokens(writer, toks);
+    }
 };

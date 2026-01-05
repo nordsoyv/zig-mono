@@ -27,6 +27,23 @@ test "lex multiline string" {
     try std.testing.expect(saw_multiline_string);
 }
 
+test "dump tokens" {
+    var c = compiler.Compiler.init(std.testing.allocator);
+    defer c.deinit();
+
+    var out: std.ArrayList(u8) = .empty;
+    defer out.deinit(std.testing.allocator);
+
+    try c.dumpTokens(out.writer(std.testing.allocator), "config x { a: 1 }");
+    std.debug.print("{s}", .{out.items});
+
+    // var buf: [4096]u8 = undefined;
+    // var fbs = std.io.fixedBufferStream(&buf);
+    // try c.dumpTokens(fbs.writer(), "config x { a: 1 }");
+    // std.debug.print("{s}", .{fbs.getWritten()});
+    try std.testing.expect(out.items.len > 0);
+}
+
 const cdl_test =
 \\ config access {
 \\   portalid: 2995

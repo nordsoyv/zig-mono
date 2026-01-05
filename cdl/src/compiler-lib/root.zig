@@ -35,12 +35,7 @@ test "dump tokens" {
     defer out.deinit(std.testing.allocator);
 
     try c.dumpTokens(out.writer(std.testing.allocator), "config x { a: 1 }");
-    std.debug.print("{s}", .{out.items});
-
-    // var buf: [4096]u8 = undefined;
-    // var fbs = std.io.fixedBufferStream(&buf);
-    // try c.dumpTokens(fbs.writer(), "config x { a: 1 }");
-    // std.debug.print("{s}", .{fbs.getWritten()});
+    // std.debug.print("{s}", .{out.items});
     try std.testing.expect(out.items.len > 0);
 }
 

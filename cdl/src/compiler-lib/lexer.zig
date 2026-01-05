@@ -208,9 +208,6 @@ pub const Lexer = struct {
     fn string(self: *Lexer, quote: u8, start_i: usize, start_line: u32, start_col: u32) Token {
         _ = self.advance();
         while (self.peek()) |c| {
-            if (c == '\n') {
-                return self.make(.invalid, start_i, start_line, start_col);
-            }
             if (c == quote) {
                 _ = self.advance();
                 return self.make(.string, start_i, start_line, start_col);

@@ -3,27 +3,6 @@ const std = @import("std");
 
 pub const lexer = @import("lexer.zig");
 
-pub fn bufferedPrint() !void {
-    // Stdout is for the actual output of your application, for example if you
-    // are implementing gzip, then only the compressed bytes should be sent to
-    // stdout, not any debugging messages.
-    var stdout_buffer: [1024]u8 = undefined;
-    var stdout_writer = std.fs.File.stdout().writer(&stdout_buffer);
-    const stdout = &stdout_writer.interface;
-
-    try stdout.print("Run `zig build test` to run the tests.\n", .{});
-
-    try stdout.flush(); // Don't forget to flush!
-}
-
-pub fn add(a: i32, b: i32) i32 {
-    return a + b;
-}
-
-test "basic add functionality" {
-    try std.testing.expect(add(3, 7) == 10);
-}
-
 test "lex cdl_test" {
     var l = lexer.Lexer.init(cdl_test);
     while (true) {
@@ -31,6 +10,22 @@ test "lex cdl_test" {
         try std.testing.expect(t.kind != .invalid);
         if (t.kind == .eof) break;
     }
+}
+
+test "lex multiline string" {
+    var l = lexer.Lexer.init(cdl_multiline_string_test);
+    var saw_multiline_string = false;
+    while (true) {
+        const t = l.next();
+        try std.testing.expect(t.kind != .invalid);
+        if (t.kind == .string) {
+            if (std.mem.indexOfScalar(u8, t.lexeme, '\n') != null) {
+                saw_multiline_string = true;
+            }
+        }
+        if (t.kind == .eof) break;
+    }
+    try std.testing.expect(saw_multiline_string);
 }
 
 const cdl_test =
@@ -1206,5 +1201,12 @@ const cdl_test =
 \\   categorySet #openItems {
 \\     question: textAnalyticsDataset.overallScore:variable
 \\   }
+\\ }
+;
+
+const cdl_multiline_string_test =
+\\ config access {
+\\   hierarchyVariable: "line1
+\\ line2"
 \\ }
 ;

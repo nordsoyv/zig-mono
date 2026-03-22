@@ -21,14 +21,14 @@ pub fn drawConstructor(entity: e.Entity) !void {
         var buffer: [100]u8 = undefined;
         const xStartPos: c_int = @intFromFloat(data.rectangle.x);
         const yStartPos: c_int = @intFromFloat(data.rectangle.y);
-        draw.drawBox(data.rectangle, "Constructor");
+        draw.box(data.rectangle, "Constructor");
         const entityData = &entity.kind.Constructor;
         if (entityData.recipe) |recipe| {
             const result = try std.fmt.bufPrintZ(&buffer, "Recipe: {s}", .{recipe.name});
             rl.drawText(@ptrCast(result), xStartPos + 20, yStartPos + 20, 10, rl.Color.black);
         }
         rl.drawText("Progress: ", xStartPos + 20, yStartPos + 40, 10, rl.Color.black);
-        draw.drawProgressBar(xStartPos + 20, yStartPos + 50, data.rectangle.width - 60, entityData.progress);
+        draw.progressBar(xStartPos + 20, yStartPos + 50, data.rectangle.width - 60, entityData.progress);
         if (entityData.output.items.len > 0) {
             const result = try std.fmt.bufPrintZ(&buffer, "Output: {} {s}", .{ entityData.output.items.len, entityData.output.getLast().name });
             rl.drawText(@ptrCast(result), xStartPos + 20, yStartPos + 60, 10, rl.Color.black);

@@ -2,8 +2,8 @@ const std = @import("std");
 const print = std.debug.print;
 const ArrayList = std.ArrayList;
 
-const drawBox = @import("../draw.zig").drawBox;
-const drawProgressBar = @import("../draw.zig").drawProgressBar;
+const drawBox = @import("../draw.zig").box;
+const drawProgressBar = @import("../draw.zig").progressBar;
 const Item = @import("../recipe.zig").Item;
 const Recipe = @import("../recipe.zig").Recipe;
 const rl = @import("raylib");

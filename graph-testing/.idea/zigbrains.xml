@@ -3,9 +3,9 @@
   <component name="BuildScanner">
     <option name="projects">
       <list><![CDATA[{
-  "name": null,
-  "version": null,
-  "path": "C:\\kode\\pers\\zig-mono\\graph-testing",
+  "name": "graph_testing",
+  "version": "0.0.0",
+  "path": "C:\\kode\\zig-mono\\graph-testing",
   "steps": [
     {
       "name": "install",
@@ -37,9 +37,9 @@
     }
   ]
 }]]><![CDATA[{
-  "name": null,
-  "version": null,
-  "path": "C:\\Users\\oyvind.nordsveen\\AppData\\Local\\zig\\p\\raylib_zig-5.6.0-dev-KE8REL5MBQAf3p497t52Xw9P7ojndIkVOWPXnLiLLw2P",
+  "name": "raylib_zig",
+  "version": "5.6.0-dev",
+  "path": "C:\\Users\\o_nor\\AppData\\Local\\zig\\p\\raylib_zig-5.6.0-dev-KE8REL5MBQAf3p497t52Xw9P7ojndIkVOWPXnLiLLw2P",
   "steps": [
     {
       "name": "install",
@@ -1406,9 +1406,9 @@
     }
   ]
 }]]><![CDATA[{
-  "name": null,
-  "version": null,
-  "path": "C:\\Users\\oyvind.nordsveen\\AppData\\Local\\zig\\p\\raylib-5.6.0-dev-whq8uCg2ywTzCiX3VEP9RuCMXR6_VnDBmkj8GjL_p5QN",
+  "name": "raylib",
+  "version": "5.6.0-dev",
+  "path": "C:\\Users\\o_nor\\AppData\\Local\\zig\\p\\raylib-5.6.0-dev-whq8uCg2ywTzCiX3VEP9RuCMXR6_VnDBmkj8GjL_p5QN",
   "steps": [
     {
       "name": "install",
@@ -3128,9 +3128,9 @@
     }
   ]
 }]]><![CDATA[{
-  "name": null,
+  "name": "xcode_frameworks",
   "version": null,
-  "path": "C:\\Users\\oyvind.nordsveen\\AppData\\Local\\zig\\p\\N-V-__8AABHMqAWYuRdIlflwi8gksPnlUMQBiSxAqQAAZFms",
+  "path": "C:\\Users\\o_nor\\AppData\\Local\\zig\\p\\N-V-__8AABHMqAWYuRdIlflwi8gksPnlUMQBiSxAqQAAZFms",
   "steps": [
     {
       "name": "install",
@@ -3146,9 +3146,9 @@
   "modules": [],
   "dependencies": []
 }]]><![CDATA[{
-  "name": null,
+  "name": "emsdk",
   "version": null,
-  "path": "C:\\Users\\oyvind.nordsveen\\AppData\\Local\\zig\\p\\N-V-__8AAJl1DwBezhYo_VE6f53mPVm00R-Fk28NPW7P14EQ",
+  "path": "C:\\Users\\o_nor\\AppData\\Local\\zig\\p\\N-V-__8AAJl1DwBezhYo_VE6f53mPVm00R-Fk28NPW7P14EQ",
   "steps": [
     {
       "name": "install",
@@ -3164,9 +3164,9 @@
   "modules": [],
   "dependencies": []
 }]]><![CDATA[{
-  "name": null,
-  "version": null,
-  "path": "C:\\Users\\oyvind.nordsveen\\AppData\\Local\\zig\\p\\zemscripten-0.2.0-dev-sRlDqApRAACspTbAZnuNKWIzfWzSYgYkb2nWAXZ-tqqt",
+  "name": "zemscripten",
+  "version": "0.2.0-dev",
+  "path": "C:\\Users\\o_nor\\AppData\\Local\\zig\\p\\zemscripten-0.2.0-dev-sRlDqApRAACspTbAZnuNKWIzfWzSYgYkb2nWAXZ-tqqt",
   "steps": [
     {
       "name": "install",
@@ -3188,9 +3188,9 @@
   ],
   "dependencies": []
 }]]><![CDATA[{
-  "name": null,
+  "name": "raygui",
   "version": null,
-  "path": "C:\\Users\\oyvind.nordsveen\\AppData\\Local\\zig\\p\\N-V-__8AALUbbwDKkSH4nbf3Ml_dTWo9qbELvle5i9eQZMuo",
+  "path": "C:\\Users\\o_nor\\AppData\\Local\\zig\\p\\N-V-__8AALUbbwDKkSH4nbf3Ml_dTWo9qbELvle5i9eQZMuo",
   "steps": [
     {
       "name": "install",
@@ -3206,9 +3206,9 @@
   "modules": [],
   "dependencies": []
 }]]><![CDATA[{
-  "name": null,
-  "version": null,
-  "path": "C:\\Users\\oyvind.nordsveen\\AppData\\Local\\zig\\p\\zemscripten-0.2.0-dev-sRlDqFJSAAB8hgnRt5DDMKP3zLlDtMnUDwYRJVCa5lGY",
+  "name": "zemscripten",
+  "version": "0.2.0-dev",
+  "path": "C:\\Users\\o_nor\\AppData\\Local\\zig\\p\\zemscripten-0.2.0-dev-sRlDqFJSAAB8hgnRt5DDMKP3zLlDtMnUDwYRJVCa5lGY",
   "steps": [
     {
       "name": "install",
@@ -3232,5 +3232,5 @@
 }]]></list>
     </option>
   </component>
-  <component name="ZigToolchain" toolchain="fb2911f1-a014-410d-91b9-41509096882a" />
+  <component name="ZigToolchain" toolchain="75d1cca2-f533-4873-aabc-6b09578d8c4c" />
 </project>
